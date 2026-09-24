@@ -245,29 +245,40 @@ if (navToggle && navMenu) {
   });
   
 /* ========================================================================
-   PAGINACIÓN / CARRUSEL DEL CATÁLOGO (Page-based auto-play)
+   PAGINACIÓN / CARRUSEL DEL CATÁLOGO (Page-based auto-play, responsive)
    ======================================================================== */
-const pages = document.querySelectorAll('.catalog__grid .carousel-page');
 const btnNext = document.querySelector('.carousel-btn--next');
 const btnPrev = document.querySelector('.carousel-btn--prev');
 const catalogContainer = document.querySelector('.catalog-container');
+const catalogGrid = document.querySelector('.catalog__grid');
 
-if (pages.length && btnNext && btnPrev && catalogContainer) {
+if (btnNext && btnPrev && catalogContainer && catalogGrid) {
   let currentPage = 0;
   let autoPlayInterval = null;
   let isHovering = false;
   let userInteracted = false;
   let resumeTimeout = null;
+  let isMobileMode = false;
+  let originalHTML = null;
+  let pages = [];
+
   const AUTO_PLAY_DELAY = 6000;
   const RESUME_DELAY = 3000;
+  const MOBILE_BREAKPOINT = '(max-width: 48rem)';
 
-  function getTotalPages() {
-    // En desktop: 3 páginas (3 cards cada una), en móvil: 9 páginas (1 card cada una)
-    return window.matchMedia('(max-width: 48rem)').matches ? 9 : 3;
+  function isMobile() {
+    return window.matchMedia(MOBILE_BREAKPOINT).matches;
+  }
+
+  function getPages() {
+    return catalogGrid.querySelectorAll('.carousel-page');
+  }
+
+  function updatePagesRef() {
+    pages = Array.from(getPages());
   }
 
   function updateCatalog() {
-    const totalPages = getTotalPages();
     pages.forEach((page, index) => {
       page.classList.remove('is-active');
       if (index === currentPage) {
@@ -275,25 +286,25 @@ if (pages.length && btnNext && btnPrev && catalogContainer) {
       }
     });
     // Ajustar currentPage si excede el total
-    if (currentPage >= totalPages) {
+    if (currentPage >= pages.length) {
       currentPage = 0;
+    } else if (currentPage < 0) {
+      currentPage = pages.length - 1;
     }
   }
 
   function advanceCarousel(direction = 1) {
-    const totalPages = getTotalPages();
     currentPage += direction;
-    if (currentPage >= totalPages) {
+    if (currentPage >= pages.length) {
       currentPage = 0;
     } else if (currentPage < 0) {
-      currentPage = totalPages - 1;
+      currentPage = pages.length - 1;
     }
     updateCatalog();
   }
 
   function startAutoPlay() {
     stopAutoPlay();
-    // No auto-play en dispositivos táctiles o si prefiere movimiento reducido
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const isTouch = window.matchMedia('(hover: none)').matches;
     if (prefersReducedMotion || isTouch) return;
@@ -318,6 +329,60 @@ if (pages.length && btnNext && btnPrev && catalogContainer) {
       userInteracted = false;
       startAutoPlay();
     }, RESUME_DELAY);
+  }
+
+  function setupMobileCarousel() {
+    if (isMobileMode) return;
+    
+    // Guardar HTML original si no existe
+    if (!originalHTML) {
+      originalHTML = catalogGrid.innerHTML;
+    }
+
+    // Obtener todas las cards en orden
+    const allCards = catalogGrid.querySelectorAll('.carousel-page .card');
+    if (allCards.length !== 9) return; // seguridad
+
+    // Vaciar grid
+    catalogGrid.innerHTML = '';
+
+    // Crear 9 páginas con 1 card cada una
+    allCards.forEach((card, i) => {
+      const page = document.createElement('div');
+      page.className = 'carousel-page' + (i === 0 ? ' is-active' : '');
+      page.appendChild(card.cloneNode(true));
+      catalogGrid.appendChild(page);
+    });
+
+    isMobileMode = true;
+    updatePagesRef();
+    currentPage = 0;
+    updateCatalog();
+  }
+
+  function restoreDesktopCarousel() {
+    if (!isMobileMode) return;
+    if (!originalHTML) return;
+
+    catalogGrid.innerHTML = originalHTML;
+    isMobileMode = false;
+    updatePagesRef();
+    currentPage = 0;
+    updateCatalog();
+  }
+
+  // Debounce simple
+  let resizeTimer = null;
+  function debouncedResize() {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      if (isMobile() && !isMobileMode) {
+        setupMobileCarousel();
+      } else if (!isMobile() && isMobileMode) {
+        restoreDesktopCarousel();
+      }
+      updateCatalog();
+    }, 150);
   }
 
   // Auto-play init
@@ -347,11 +412,15 @@ if (pages.length && btnNext && btnPrev && catalogContainer) {
   });
 
   // Re-evaluar al cambiar tamaño de ventana
-  window.addEventListener('resize', function () {
-    updateCatalog();
-  });
+  window.addEventListener('resize', debouncedResize);
 
-  updateCatalog();
+  // Inicialización correcta según breakpoint
+  if (isMobile()) {
+    setupMobileCarousel();
+  } else {
+    updatePagesRef();
+    updateCatalog();
+  }
 }
 
 })();
