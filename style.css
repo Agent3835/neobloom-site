@@ -1052,7 +1052,7 @@ a { color: inherit; text-decoration: none; }
   /* Tarjetas más compactas */
   .card {
     min-height: auto;
-    border-radius: clamp(1.5rem, 4vw, 2rem);
+    border-radius: 10rem;
   }
   .card__image-box {
     width: clamp(120px, 40vw, 180px);
