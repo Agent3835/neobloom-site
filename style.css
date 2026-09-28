@@ -1173,8 +1173,12 @@ body.is-loaded .page-loader {
 
 /* Responsive: 1 columna en móvil */
 @media (max-width: 48rem) {
+  .catalog__grid {
+    min-height: 0; /* sin piso de 38rem: la página activa define la altura */
+  }
   .carousel-page {
     grid-template-columns: 1fr;
+    align-items: start; /* la card no se estira aunque la página tenga altura extra */
   }
 }
 
