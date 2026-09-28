@@ -92,6 +92,10 @@
 html {
   scroll-behavior: smooth;            /* navegación por anclas suave */
   -webkit-text-size-adjust: 100%;
+  /* Reserva el hueco de la barra de scroll siempre. Si no, al bloquear el
+     scroll con body.is-modal-open (overflow:hidden) la barra desaparece, el
+     viewport ensancha y todo el layout centrado se mueve a la derecha. */
+  scrollbar-gutter: stable;
 }
 
 body {
