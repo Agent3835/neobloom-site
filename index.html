@@ -218,6 +218,12 @@
           Un fragmento extraído del universo NeoBloom. Movelo con el cursor 
           para ver más sobre el.
         </p>
+
+        <!-- Botón "?": abre el modal con la explicación del dispositivo -->
+        <button class="info-btn" type="button" aria-haspopup="dialog" aria-controls="info-modal">
+          <span aria-hidden="true">?</span>
+          <span class="sr-only">¿De qué se trata este dispositivo?</span>
+        </button>
       </header>
 
       <!-- Contenedor responsivo: 80vw × 60vh (editable en style.css, ver
@@ -469,6 +475,34 @@
     <p>Recetas bajo licencia libre. Cultivá, devolvé.</p>
   </div>
 </footer>
+
+<!-- ============================================================================
+   8 · MODAL DE INFORMACIÓN (lo abre el botón "?" de la sección Simbiosis)
+   ======================================================================== -->
+<div class="modal" id="info-modal" role="dialog" aria-modal="true"
+     aria-labelledby="info-modal-title" aria-hidden="true" inert>
+
+  <!-- Fondo oscurecido: al tocarlo se cierra -->
+  <div class="modal__backdrop" data-modal-close></div>
+
+  <div class="modal__panel">
+    <button class="modal__close" type="button" data-modal-close aria-label="Cerrar">&#215;</button>
+
+    <p class="section__tag">Sobre el dispositivo</p>
+
+    <h2 class="modal__title" id="info-modal-title">
+      ¿De qué se trata este dispositivo?
+    </h2>
+
+    <p class="modal__text">
+      Este módulo es un motor vital para nuestra economía circular. Transforma la
+      materia en energía limpia mediante una retroalimentación constante con su
+      infraestructura. En este ciclo cerrado no hay desperdicio, cada residuo es
+      reasimilado por la red para convertirse en nutrientes o recursos esenciales
+      para la ciudad.
+    </p>
+  </div>
+</div>
 
 <!-- ===== JAVASCRIPT (al final del body para que el DOM ya exista) ===== -->
 <script src="script.js"></script>

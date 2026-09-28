@@ -423,4 +423,76 @@ if (btnNext && btnPrev && catalogContainer && catalogGrid) {
   }
 }
 
+/* ========================================================================
+   6 · MODAL DE INFORMACIÓN (botón "?" de la sección Simbiosis)
+   Abre/cierra con el botón, la X, el fondo o la tecla Escape.
+   Mientras está abierto: bloqueo de scroll, foco en la X y trampa de foco
+   (Tab no se sale del panel).
+   ======================================================================== */
+const infoBtn = document.querySelector('.info-btn');
+const infoModal = document.getElementById('info-modal');
+
+if (infoBtn && infoModal) {
+  const closeBtn = infoModal.querySelector('.modal__close');
+  const focusables = infoModal.querySelectorAll(
+    'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+  );
+  let lastFocused = null;
+
+  function openModal() {
+    // Si se abrió con un clic programático el foco sigue en el body:
+    // en ese caso devolvemos el foco al botón que la abrió.
+    lastFocused = document.activeElement === document.body ? infoBtn : document.activeElement;
+    infoModal.classList.add('is-open');
+    infoModal.removeAttribute('aria-hidden');
+    infoModal.removeAttribute('inert');
+    document.body.classList.add('is-modal-open');
+
+    // El panel no depende de una transición para volverse enfocable
+    // (ver .modal en style.css), así que el foco se traslada en el acto.
+    if (closeBtn) closeBtn.focus();
+  }
+
+  function closeModal() {
+    infoModal.classList.remove('is-open');
+    infoModal.setAttribute('aria-hidden', 'true');
+    infoModal.setAttribute('inert', '');
+    document.body.classList.remove('is-modal-open');
+    if (lastFocused) lastFocused.focus();
+  }
+
+  function isOpen() {
+    return infoModal.classList.contains('is-open');
+  }
+
+  infoBtn.addEventListener('click', openModal);
+
+  // Fondo y botón de cierre comparten el mismo atributo
+  infoModal.querySelectorAll('[data-modal-close]').forEach(function (el) {
+    el.addEventListener('click', closeModal);
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (!isOpen()) return;
+
+    if (e.key === 'Escape') {
+      closeModal();
+      return;
+    }
+
+    // Trampa de foco: Tab cicla dentro del modal
+    if (e.key === 'Tab' && focusables.length) {
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+}
+
 })();
